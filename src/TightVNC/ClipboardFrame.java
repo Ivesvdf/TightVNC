@@ -1,3 +1,5 @@
+package TightVNC;
+
 //
 //  Copyright (C) 2001 HorizonLive.com, Inc.  All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
@@ -22,112 +24,149 @@
 // Clipboard frame.
 //
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.TextArea;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
-class ClipboardFrame extends Frame
-  implements WindowListener, ActionListener {
+import javax.swing.JButton;
 
-  TextArea textArea;
-  Button clearButton, closeButton;
-  String selection;
-  VncViewer viewer;
+class ClipboardFrame extends Frame implements WindowListener, ActionListener
+{
 
-  //
-  // Constructor.
-  //
+	TextArea textArea;
+	JButton clearButton, closeButton;
+	String selection;
+	VncViewer viewer;
 
-  ClipboardFrame(VncViewer v) {
-    super("TightVNC Clipboard");
+	//
+	// Constructor.
+	//
 
-    viewer = v;
+	ClipboardFrame(VncViewer v)
+	{
+		super("TightVNC Clipboard");
 
-    GridBagLayout gridbag = new GridBagLayout();
-    setLayout(gridbag);
+		viewer = v;
 
-    GridBagConstraints gbc = new GridBagConstraints();
-    gbc.gridwidth = GridBagConstraints.REMAINDER;
-    gbc.fill = GridBagConstraints.BOTH;
-    gbc.weighty = 1.0;
+		GridBagLayout gridbag = new GridBagLayout();
+		setLayout(gridbag);
 
-    textArea = new TextArea(5, 40);
-    gridbag.setConstraints(textArea, gbc);
-    add(textArea);
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.gridwidth = GridBagConstraints.REMAINDER;
+		gbc.fill = GridBagConstraints.BOTH;
+		gbc.weighty = 1.0;
 
-    gbc.fill = GridBagConstraints.HORIZONTAL;
-    gbc.weightx = 1.0;
-    gbc.weighty = 0.0;
-    gbc.gridwidth = 1;
+		textArea = new TextArea(5, 40);
+		gridbag.setConstraints(textArea, gbc);
+		add(textArea);
 
-    clearButton = new Button("Clear");
-    gridbag.setConstraints(clearButton, gbc);
-    add(clearButton);
-    clearButton.addActionListener(this);
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		gbc.weightx = 1.0;
+		gbc.weighty = 0.0;
+		gbc.gridwidth = 1;
 
-    closeButton = new Button("Close");
-    gridbag.setConstraints(closeButton, gbc);
-    add(closeButton);
-    closeButton.addActionListener(this);
+		clearButton = new JButton("Clear");
+		gridbag.setConstraints(clearButton, gbc);
+		add(clearButton);
+		clearButton.addActionListener(this);
 
-    pack();
+		closeButton = new JButton("Close");
+		gridbag.setConstraints(closeButton, gbc);
+		add(closeButton);
+		closeButton.addActionListener(this);
 
-    addWindowListener(this);
-  }
+		pack();
 
+		addWindowListener(this);
+	}
 
-  //
-  // Set the cut text from the RFB server.
-  //
+	//
+	// Set the cut text from the RFB server.
+	//
 
-  void setCutText(String text) {
-    selection = text;
-    textArea.setText(text);
-    if (isVisible()) {
-      textArea.selectAll();
-    }
-  }
+	void setCutText(String text)
+	{
+		selection = text;
+		textArea.setText(text);
+		if (isVisible())
+		{
+			textArea.selectAll();
+		}
+	}
 
+	//
+	// When the focus leaves the window, see if we have new cut text and
+	// if so send it to the RFB server.
+	//
 
-  //
-  // When the focus leaves the window, see if we have new cut text and
-  // if so send it to the RFB server.
-  //
+	@Override
+	public void windowDeactivated(WindowEvent evt)
+	{
+		if (selection != null && !selection.equals(textArea.getText()))
+		{
+			selection = textArea.getText();
+			viewer.setCutText(selection);
+		}
+	}
 
-  public void windowDeactivated (WindowEvent evt) {
-    if (selection != null && !selection.equals(textArea.getText())) {
-      selection = textArea.getText();
-      viewer.setCutText(selection);
-    }
-  }
+	//
+	// Close our window properly.
+	//
 
-  //
-  // Close our window properly.
-  //
+	@Override
+	public void windowClosing(WindowEvent evt)
+	{
+		setVisible(false);
+	}
 
-  public void windowClosing(WindowEvent evt) {
-    setVisible(false);
-  }
+	//
+	// Ignore window events we're not interested in.
+	//
 
-  //
-  // Ignore window events we're not interested in.
-  //
+	@Override
+	public void windowActivated(WindowEvent evt)
+	{
+	}
 
-  public void windowActivated(WindowEvent evt) {}
-  public void windowOpened(WindowEvent evt) {}
-  public void windowClosed(WindowEvent evt) {}
-  public void windowIconified(WindowEvent evt) {}
-  public void windowDeiconified(WindowEvent evt) {}
+	@Override
+	public void windowOpened(WindowEvent evt)
+	{
+	}
 
+	@Override
+	public void windowClosed(WindowEvent evt)
+	{
+	}
 
-  //
-  // Respond to button presses
-  //
+	@Override
+	public void windowIconified(WindowEvent evt)
+	{
+	}
 
-  public void actionPerformed(ActionEvent evt) {
-    if (evt.getSource() == clearButton) {
-      textArea.setText("");
-    } else if (evt.getSource() == closeButton) {
-      setVisible(false);
-    }
-  }
+	@Override
+	public void windowDeiconified(WindowEvent evt)
+	{
+	}
+
+	//
+	// Respond to button presses
+	//
+
+	@Override
+	public void actionPerformed(ActionEvent evt)
+	{
+		if (evt.getSource() == clearButton)
+		{
+			textArea.setText("");
+		}
+		else if (evt.getSource() == closeButton)
+		{
+			setVisible(false);
+		}
+	}
 }

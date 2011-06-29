@@ -1,3 +1,5 @@
+package TightVNC;
+
 //
 //  Copyright (C) 2001 HorizonLive.com, Inc.  All Rights Reserved.
 //  Copyright (C) 2001 Constantin Kaplinsky.  All Rights Reserved.
@@ -27,379 +29,450 @@
 // It sets the encodings array and some booleans.
 //
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Choice;
+import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Label;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
-class OptionsFrame extends Frame
-  implements WindowListener, ActionListener, ItemListener {
+import javax.swing.JButton;
 
-  static String[] names = {
-    "Encoding",
-    "Compression level",
-    "JPEG image quality",
-    "Cursor shape updates",
-    "Use CopyRect",
-    "Restricted colors",
-    "Mouse buttons 2 and 3",
-    "View only",
-    "Scale remote cursor",
-    "Share desktop",
-  };
+class OptionsFrame extends Frame implements WindowListener, ActionListener,
+		ItemListener
+{
 
-  static String[][] values = {
-    { "Auto", "Raw", "RRE", "CoRRE", "Hextile", "Zlib", "Tight", "ZRLE" },
-    { "Default", "1", "2", "3", "4", "5", "6", "7", "8", "9" },
-    { "JPEG off", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" },
-    { "Enable", "Ignore", "Disable" },
-    { "Yes", "No" },
-    { "Yes", "No" },
-    { "Normal", "Reversed" },
-    { "Yes", "No" },
-    { "No", "50%", "75%", "125%", "150%" },
-    { "Yes", "No" },
-  };
+	static String[] names = { "Encoding", "Compression level",
+			"JPEG image quality", "Cursor shape updates", "Use CopyRect",
+			"Restricted colors", "Mouse buttons 2 and 3", "View only",
+			"Scale remote cursor", "Share desktop", };
 
-  final int
-    encodingIndex        = 0,
-    compressLevelIndex   = 1,
-    jpegQualityIndex     = 2,
-    cursorUpdatesIndex   = 3,
-    useCopyRectIndex     = 4,
-    eightBitColorsIndex  = 5,
-    mouseButtonIndex     = 6,
-    viewOnlyIndex        = 7,
-    scaleCursorIndex     = 8,
-    shareDesktopIndex    = 9;
+	static String[][] values = {
+			{ "Auto", "Raw", "RRE", "CoRRE", "Hextile", "Zlib", "Tight", "ZRLE" },
+			{ "Default", "1", "2", "3", "4", "5", "6", "7", "8", "9" },
+			{ "JPEG off", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" },
+			{ "Enable", "Ignore", "Disable" }, { "Yes", "No" },
+			{ "Yes", "No" }, { "Normal", "Reversed" }, { "Yes", "No" },
+			{ "No", "50%", "75%", "125%", "150%" }, { "Yes", "No" }, };
 
-  Label[] labels = new Label[names.length];
-  Choice[] choices = new Choice[names.length];
-  Button closeButton;
-  VncViewer viewer;
+	final int encodingIndex = 0, compressLevelIndex = 1, jpegQualityIndex = 2,
+			cursorUpdatesIndex = 3, useCopyRectIndex = 4,
+			eightBitColorsIndex = 5, mouseButtonIndex = 6, viewOnlyIndex = 7,
+			scaleCursorIndex = 8, shareDesktopIndex = 9;
 
+	Label[] labels = new Label[names.length];
+	Choice[] choices = new Choice[names.length];
+	JButton closeButton;
+	VncViewer viewer;
 
-  //
-  // The actual data which other classes look at:
-  //
+	//
+	// The actual data which other classes look at:
+	//
 
-  int preferredEncoding;
-  int compressLevel;
-  int jpegQuality;
-  boolean useCopyRect;
-  boolean requestCursorUpdates;
-  boolean ignoreCursorUpdates;
+	int preferredEncoding;
+	int compressLevel;
+	int jpegQuality;
+	boolean useCopyRect;
+	boolean requestCursorUpdates;
+	boolean ignoreCursorUpdates;
 
-  boolean eightBitColors;
+	boolean eightBitColors;
 
-  boolean reverseMouseButtons2And3;
-  boolean shareDesktop;
-  boolean viewOnly;
-  int scaleCursor;
+	boolean reverseMouseButtons2And3;
+	boolean shareDesktop;
+	boolean viewOnly;
+	int scaleCursor;
 
-  boolean autoScale;
-  int scalingFactor;
+	boolean autoScale;
+	int scalingFactor;
 
-  //
-  // Constructor.  Set up the labels and choices from the names and values
-  // arrays.
-  //
+	//
+	// Constructor. Set up the labels and choices from the names and values
+	// arrays.
+	//
 
-  OptionsFrame(VncViewer v) {
-    super("TightVNC Options");
+	OptionsFrame(VncViewer v)
+	{
+		super("TightVNC Options");
 
-    viewer = v;
+		viewer = v;
 
-    GridBagLayout gridbag = new GridBagLayout();
-    setLayout(gridbag);
+		GridBagLayout gridbag = new GridBagLayout();
+		setLayout(gridbag);
 
-    GridBagConstraints gbc = new GridBagConstraints();
-    gbc.fill = GridBagConstraints.BOTH;
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.fill = GridBagConstraints.BOTH;
 
-    for (int i = 0; i < names.length; i++) {
-      labels[i] = new Label(names[i]);
-      gbc.gridwidth = 1;
-      gridbag.setConstraints(labels[i],gbc);
-      add(labels[i]);
+		for (int i = 0; i < names.length; i++)
+		{
+			labels[i] = new Label(names[i]);
+			gbc.gridwidth = 1;
+			gridbag.setConstraints(labels[i], gbc);
+			add(labels[i]);
 
-      choices[i] = new Choice();
-      gbc.gridwidth = GridBagConstraints.REMAINDER;
-      gridbag.setConstraints(choices[i],gbc);
-      add(choices[i]);
-      choices[i].addItemListener(this);
+			choices[i] = new Choice();
+			gbc.gridwidth = GridBagConstraints.REMAINDER;
+			gridbag.setConstraints(choices[i], gbc);
+			add(choices[i]);
+			choices[i].addItemListener(this);
 
-      for (int j = 0; j < values[i].length; j++) {
-	choices[i].addItem(values[i][j]);
-      }
-    }
+			for (int j = 0; j < values[i].length; j++)
+			{
+				choices[i].addItem(values[i][j]);
+			}
+		}
 
-    closeButton = new Button("Close");
-    gbc.gridwidth = GridBagConstraints.REMAINDER;
-    gridbag.setConstraints(closeButton, gbc);
-    add(closeButton);
-    closeButton.addActionListener(this);
+		closeButton = new JButton("Close");
+		gbc.gridwidth = GridBagConstraints.REMAINDER;
+		gridbag.setConstraints(closeButton, gbc);
+		add(closeButton);
+		closeButton.addActionListener(this);
 
-    pack();
+		pack();
 
-    addWindowListener(this);
+		addWindowListener(this);
 
-    // Set up defaults
+		// Set up defaults
 
-    choices[encodingIndex].select("Auto");
-    choices[compressLevelIndex].select("Default");
-    choices[jpegQualityIndex].select("6");
-    choices[cursorUpdatesIndex].select("Enable");
-    choices[useCopyRectIndex].select("Yes");
-    choices[eightBitColorsIndex].select("No");
-    choices[mouseButtonIndex].select("Normal");
-    choices[viewOnlyIndex].select("No");
-    choices[scaleCursorIndex].select("No");
-    choices[shareDesktopIndex].select("Yes");
+		choices[encodingIndex].select("Auto");
+		choices[compressLevelIndex].select("Default");
+		choices[jpegQualityIndex].select("6");
+		choices[cursorUpdatesIndex].select("Enable");
+		choices[useCopyRectIndex].select("Yes");
+		choices[eightBitColorsIndex].select("No");
+		choices[mouseButtonIndex].select("Normal");
+		choices[viewOnlyIndex].select("No");
+		choices[scaleCursorIndex].select("No");
+		choices[shareDesktopIndex].select("Yes");
 
-    // But let them be overridden by parameters
+		// But let them be overridden by parameters
 
-    for (int i = 0; i < names.length; i++) {
-      String s = viewer.readParameter(names[i], false);
-      if (s != null) {
-	for (int j = 0; j < values[i].length; j++) {
-	  if (s.equalsIgnoreCase(values[i][j])) {
-	    choices[i].select(j);
-	  }
+		for (int i = 0; i < names.length; i++)
+		{
+			String s = viewer.readParameter(names[i], false);
+			if (s != null)
+			{
+				for (int j = 0; j < values[i].length; j++)
+				{
+					if (s.equalsIgnoreCase(values[i][j]))
+					{
+						choices[i].select(j);
+					}
+				}
+			}
+		}
+
+		// FIXME: Provide some sort of GUI for "Scaling Factor".
+
+		autoScale = false;
+		scalingFactor = 100;
+		String s = viewer.readParameter("Scaling Factor", false);
+		if (s != null)
+		{
+			if (s.equalsIgnoreCase("Auto"))
+			{
+				autoScale = true;
+			}
+			else
+			{
+				// Remove the '%' char at the end of string if present.
+				if (s.charAt(s.length() - 1) == '%')
+				{
+					s = s.substring(0, s.length() - 1);
+				}
+				// Convert to an integer.
+				try
+				{
+					scalingFactor = Integer.parseInt(s);
+				}
+				catch (NumberFormatException e)
+				{
+					scalingFactor = 100;
+				}
+				// Make sure scalingFactor is in the range of [1..1000].
+				if (scalingFactor < 1)
+				{
+					scalingFactor = 1;
+				}
+				else if (scalingFactor > 1000)
+				{
+					scalingFactor = 1000;
+				}
+			}
+		}
+
+		// Make the booleans and encodings array correspond to the state of the
+		// GUI
+
+		setEncodings();
+		setColorFormat();
+		setOtherOptions();
 	}
-      }
-    }
 
-    // FIXME: Provide some sort of GUI for "Scaling Factor".
+	//
+	// Disable the shareDesktop option
+	//
 
-    autoScale = false;
-    scalingFactor = 100;
-    String s = viewer.readParameter("Scaling Factor", false);
-    if (s != null) {
-      if (s.equalsIgnoreCase("Auto")) {
-	autoScale = true;
-      } else {
-	// Remove the '%' char at the end of string if present.
-	if (s.charAt(s.length() - 1) == '%') {
-	  s = s.substring(0, s.length() - 1);
+	void disableShareDesktop()
+	{
+		labels[shareDesktopIndex].setEnabled(false);
+		choices[shareDesktopIndex].setEnabled(false);
 	}
-	// Convert to an integer.
-	try {
-	  scalingFactor = Integer.parseInt(s);
+
+	//
+	// setEncodings looks at the encoding, compression level, JPEG
+	// quality level, cursor shape updates and copyRect choices and sets
+	// corresponding variables properly. Then it calls the VncViewer's
+	// setEncodings method to send a SetEncodings message to the RFB
+	// server.
+	//
+
+	void setEncodings()
+	{
+		useCopyRect = choices[useCopyRectIndex].getSelectedItem().equals("Yes");
+
+		preferredEncoding = RfbProto.EncodingRaw;
+		boolean enableCompressLevel = false;
+
+		if (choices[encodingIndex].getSelectedItem().equals("RRE"))
+		{
+			preferredEncoding = RfbProto.EncodingRRE;
+		}
+		else if (choices[encodingIndex].getSelectedItem().equals("CoRRE"))
+		{
+			preferredEncoding = RfbProto.EncodingCoRRE;
+		}
+		else if (choices[encodingIndex].getSelectedItem().equals("Hextile"))
+		{
+			preferredEncoding = RfbProto.EncodingHextile;
+		}
+		else if (choices[encodingIndex].getSelectedItem().equals("ZRLE"))
+		{
+			preferredEncoding = RfbProto.EncodingZRLE;
+		}
+		else if (choices[encodingIndex].getSelectedItem().equals("Zlib"))
+		{
+			preferredEncoding = RfbProto.EncodingZlib;
+			enableCompressLevel = true;
+		}
+		else if (choices[encodingIndex].getSelectedItem().equals("Tight"))
+		{
+			preferredEncoding = RfbProto.EncodingTight;
+			enableCompressLevel = true;
+		}
+		else if (choices[encodingIndex].getSelectedItem().equals("Auto"))
+		{
+			preferredEncoding = -1;
+		}
+
+		// Handle compression level setting.
+
+		try
+		{
+			compressLevel = Integer.parseInt(choices[compressLevelIndex]
+					.getSelectedItem());
+		}
+		catch (NumberFormatException e)
+		{
+			compressLevel = -1;
+		}
+		if (compressLevel < 1 || compressLevel > 9)
+		{
+			compressLevel = -1;
+		}
+		labels[compressLevelIndex].setEnabled(enableCompressLevel);
+		choices[compressLevelIndex].setEnabled(enableCompressLevel);
+
+		// Handle JPEG quality setting.
+
+		try
+		{
+			jpegQuality = Integer.parseInt(choices[jpegQualityIndex]
+					.getSelectedItem());
+		}
+		catch (NumberFormatException e)
+		{
+			jpegQuality = -1;
+		}
+		if (jpegQuality < 0 || jpegQuality > 9)
+		{
+			jpegQuality = -1;
+		}
+
+		// Request cursor shape updates if necessary.
+
+		requestCursorUpdates = !choices[cursorUpdatesIndex].getSelectedItem()
+				.equals("Disable");
+
+		if (requestCursorUpdates)
+		{
+			ignoreCursorUpdates = choices[cursorUpdatesIndex].getSelectedItem()
+					.equals("Ignore");
+		}
+
+		viewer.setEncodings();
 	}
-	catch (NumberFormatException e) {
-	  scalingFactor = 100;
+
+	//
+	// setColorFormat sets eightBitColors variable depending on the GUI
+	// setting, causing switches between 8-bit and 24-bit colors mode if
+	// necessary.
+	//
+
+	void setColorFormat()
+	{
+
+		eightBitColors = choices[eightBitColorsIndex].getSelectedItem().equals(
+				"Yes");
+
+		boolean enableJPEG = !eightBitColors;
+
+		labels[jpegQualityIndex].setEnabled(enableJPEG);
+		choices[jpegQualityIndex].setEnabled(enableJPEG);
 	}
-	// Make sure scalingFactor is in the range of [1..1000].
-	if (scalingFactor < 1) {
-	  scalingFactor = 1;
-	} else if (scalingFactor > 1000) {
-	  scalingFactor = 1000;
+
+	//
+	// setOtherOptions looks at the "other" choices (ones that do not
+	// cause sending any protocol messages) and sets the boolean flags
+	// appropriately.
+	//
+
+	void setOtherOptions()
+	{
+
+		reverseMouseButtons2And3 = choices[mouseButtonIndex].getSelectedItem()
+				.equals("Reversed");
+
+		viewOnly = choices[viewOnlyIndex].getSelectedItem().equals("Yes");
+		if (viewer.vc != null)
+			viewer.vc.enableInput(!viewOnly);
+
+		shareDesktop = choices[shareDesktopIndex].getSelectedItem().equals(
+				"Yes");
+
+		String scaleString = choices[scaleCursorIndex].getSelectedItem();
+		if (scaleString.endsWith("%"))
+			scaleString = scaleString.substring(0, scaleString.length() - 1);
+		try
+		{
+			scaleCursor = Integer.parseInt(scaleString);
+		}
+		catch (NumberFormatException e)
+		{
+			scaleCursor = 0;
+		}
+		if (scaleCursor < 10 || scaleCursor > 500)
+		{
+			scaleCursor = 0;
+		}
+		if (requestCursorUpdates && !ignoreCursorUpdates && !viewOnly)
+		{
+			labels[scaleCursorIndex].setEnabled(true);
+			choices[scaleCursorIndex].setEnabled(true);
+		}
+		else
+		{
+			labels[scaleCursorIndex].setEnabled(false);
+			choices[scaleCursorIndex].setEnabled(false);
+		}
+		if (viewer.vc != null)
+			viewer.vc.createSoftCursor(); // update cursor scaling
 	}
-      }
-    }
 
-    // Make the booleans and encodings array correspond to the state of the GUI
+	//
+	// Respond to actions on Choice controls
+	//
 
-    setEncodings();
-    setColorFormat();
-    setOtherOptions();
-  }
+	@Override
+	public void itemStateChanged(ItemEvent evt)
+	{
+		Object source = evt.getSource();
 
+		if (source == choices[encodingIndex]
+				|| source == choices[compressLevelIndex]
+				|| source == choices[jpegQualityIndex]
+				|| source == choices[cursorUpdatesIndex]
+				|| source == choices[useCopyRectIndex])
+		{
 
-  //
-  // Disable the shareDesktop option
-  //
+			setEncodings();
 
-  void disableShareDesktop() {
-    labels[shareDesktopIndex].setEnabled(false);
-    choices[shareDesktopIndex].setEnabled(false);
-  }
+			if (source == choices[cursorUpdatesIndex])
+			{
+				setOtherOptions(); // update scaleCursor state
+			}
 
-  //
-  // setEncodings looks at the encoding, compression level, JPEG
-  // quality level, cursor shape updates and copyRect choices and sets
-  // corresponding variables properly. Then it calls the VncViewer's
-  // setEncodings method to send a SetEncodings message to the RFB
-  // server.
-  //
+		}
+		else if (source == choices[eightBitColorsIndex])
+		{
 
-  void setEncodings() {
-    useCopyRect = choices[useCopyRectIndex].getSelectedItem().equals("Yes");
+			setColorFormat();
 
-    preferredEncoding = RfbProto.EncodingRaw;
-    boolean enableCompressLevel = false;
+		}
+		else if (source == choices[mouseButtonIndex]
+				|| source == choices[shareDesktopIndex]
+				|| source == choices[viewOnlyIndex]
+				|| source == choices[scaleCursorIndex])
+		{
 
-    if (choices[encodingIndex].getSelectedItem().equals("RRE")) {
-      preferredEncoding = RfbProto.EncodingRRE;
-    } else if (choices[encodingIndex].getSelectedItem().equals("CoRRE")) {
-      preferredEncoding = RfbProto.EncodingCoRRE;
-    } else if (choices[encodingIndex].getSelectedItem().equals("Hextile")) {
-      preferredEncoding = RfbProto.EncodingHextile;
-    } else if (choices[encodingIndex].getSelectedItem().equals("ZRLE")) {
-      preferredEncoding = RfbProto.EncodingZRLE;
-    } else if (choices[encodingIndex].getSelectedItem().equals("Zlib")) {
-      preferredEncoding = RfbProto.EncodingZlib;
-      enableCompressLevel = true;
-    } else if (choices[encodingIndex].getSelectedItem().equals("Tight")) {
-      preferredEncoding = RfbProto.EncodingTight;
-      enableCompressLevel = true;
-    } else if (choices[encodingIndex].getSelectedItem().equals("Auto")) {
-      preferredEncoding = -1;
-    }
+			setOtherOptions();
 
-    // Handle compression level setting.
+		}
+	}
 
-    try {
-      compressLevel =
-        Integer.parseInt(choices[compressLevelIndex].getSelectedItem());
-    }
-    catch (NumberFormatException e) {
-      compressLevel = -1;
-    }
-    if (compressLevel < 1 || compressLevel > 9) {
-      compressLevel = -1;
-    }
-    labels[compressLevelIndex].setEnabled(enableCompressLevel);
-    choices[compressLevelIndex].setEnabled(enableCompressLevel);
+	//
+	// Respond to button press
+	//
 
-    // Handle JPEG quality setting.
+	@Override
+	public void actionPerformed(ActionEvent evt)
+	{
+		if (evt.getSource() == closeButton)
+			setVisible(false);
+	}
 
-    try {
-      jpegQuality =
-        Integer.parseInt(choices[jpegQualityIndex].getSelectedItem());
-    }
-    catch (NumberFormatException e) {
-      jpegQuality = -1;
-    }
-    if (jpegQuality < 0 || jpegQuality > 9) {
-      jpegQuality = -1;
-    }
+	//
+	// Respond to window events
+	//
 
-    // Request cursor shape updates if necessary.
+	@Override
+	public void windowClosing(WindowEvent evt)
+	{
+		setVisible(false);
+	}
 
-    requestCursorUpdates =
-      !choices[cursorUpdatesIndex].getSelectedItem().equals("Disable");
+	@Override
+	public void windowActivated(WindowEvent evt)
+	{
+	}
 
-    if (requestCursorUpdates) {
-      ignoreCursorUpdates =
-	choices[cursorUpdatesIndex].getSelectedItem().equals("Ignore");
-    }
+	@Override
+	public void windowDeactivated(WindowEvent evt)
+	{
+	}
 
-    viewer.setEncodings();
-  }
+	@Override
+	public void windowOpened(WindowEvent evt)
+	{
+	}
 
-  //
-  // setColorFormat sets eightBitColors variable depending on the GUI
-  // setting, causing switches between 8-bit and 24-bit colors mode if
-  // necessary.
-  //
+	@Override
+	public void windowClosed(WindowEvent evt)
+	{
+	}
 
-  void setColorFormat() {
+	@Override
+	public void windowIconified(WindowEvent evt)
+	{
+	}
 
-    eightBitColors =
-      choices[eightBitColorsIndex].getSelectedItem().equals("Yes");
-
-    boolean enableJPEG = !eightBitColors;
-
-    labels[jpegQualityIndex].setEnabled(enableJPEG);
-    choices[jpegQualityIndex].setEnabled(enableJPEG);
-  }
-
-  //
-  // setOtherOptions looks at the "other" choices (ones that do not
-  // cause sending any protocol messages) and sets the boolean flags
-  // appropriately.
-  //
-
-  void setOtherOptions() {
-
-    reverseMouseButtons2And3
-      = choices[mouseButtonIndex].getSelectedItem().equals("Reversed");
-
-    viewOnly 
-      = choices[viewOnlyIndex].getSelectedItem().equals("Yes");
-    if (viewer.vc != null)
-      viewer.vc.enableInput(!viewOnly);
-
-    shareDesktop
-      = choices[shareDesktopIndex].getSelectedItem().equals("Yes");
-
-    String scaleString = choices[scaleCursorIndex].getSelectedItem();
-    if (scaleString.endsWith("%"))
-      scaleString = scaleString.substring(0, scaleString.length() - 1);
-    try {
-      scaleCursor = Integer.parseInt(scaleString);
-    }
-    catch (NumberFormatException e) {
-      scaleCursor = 0;
-    }
-    if (scaleCursor < 10 || scaleCursor > 500) {
-      scaleCursor = 0;
-    }
-    if (requestCursorUpdates && !ignoreCursorUpdates && !viewOnly) {
-      labels[scaleCursorIndex].setEnabled(true);
-      choices[scaleCursorIndex].setEnabled(true);
-    } else {
-      labels[scaleCursorIndex].setEnabled(false);
-      choices[scaleCursorIndex].setEnabled(false);
-    }
-    if (viewer.vc != null)
-      viewer.vc.createSoftCursor(); // update cursor scaling
-  }
-
-
-  //
-  // Respond to actions on Choice controls
-  //
-
-  public void itemStateChanged(ItemEvent evt) {
-    Object source = evt.getSource();
-
-    if (source == choices[encodingIndex] ||
-        source == choices[compressLevelIndex] ||
-        source == choices[jpegQualityIndex] ||
-        source == choices[cursorUpdatesIndex] ||
-        source == choices[useCopyRectIndex]) {
-
-      setEncodings();
-
-      if (source == choices[cursorUpdatesIndex]) {
-        setOtherOptions();      // update scaleCursor state
-      }
-
-    } else if (source == choices[eightBitColorsIndex]) {
-
-      setColorFormat();
-
-    } else if (source == choices[mouseButtonIndex] ||
-	       source == choices[shareDesktopIndex] ||
-	       source == choices[viewOnlyIndex] ||
-	       source == choices[scaleCursorIndex]) {
-
-      setOtherOptions();
-
-    }
-  }
-
-  //
-  // Respond to button press
-  //
-
-  public void actionPerformed(ActionEvent evt) {
-    if (evt.getSource() == closeButton)
-      setVisible(false);
-  }
-
-  //
-  // Respond to window events
-  //
-
-  public void windowClosing(WindowEvent evt) {
-    setVisible(false);
-  }
-
-  public void windowActivated(WindowEvent evt) {}
-  public void windowDeactivated(WindowEvent evt) {}
-  public void windowOpened(WindowEvent evt) {}
-  public void windowClosed(WindowEvent evt) {}
-  public void windowIconified(WindowEvent evt) {}
-  public void windowDeiconified(WindowEvent evt) {}
+	@Override
+	public void windowDeiconified(WindowEvent evt)
+	{
+	}
 }

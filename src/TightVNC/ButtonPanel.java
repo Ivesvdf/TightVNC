@@ -1,3 +1,5 @@
+package TightVNC;
+
 //
 //  Copyright (C) 2001,2002 HorizonLive.com, Inc.  All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
@@ -23,132 +25,163 @@
 // VNCViewer desktop window.
 //
 
-import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
+import java.awt.FlowLayout;
+import java.awt.Panel;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.io.IOException;
 
-class ButtonPanel extends Panel implements ActionListener {
+import javax.swing.JButton;
 
-  VncViewer viewer;
-  Button disconnectButton;
-  Button optionsButton;
-  Button recordButton;
-  Button clipboardButton;
-  Button ctrlAltDelButton;
-  Button refreshButton;
+class ButtonPanel extends Panel implements ActionListener
+{
 
-  ButtonPanel(VncViewer v) {
-    viewer = v;
+	VncViewer viewer;
+	JButton disconnectButton;
+	JButton optionsButton;
+	JButton recordButton;
+	JButton clipboardButton;
+	JButton ctrlAltDelButton;
+	JButton refreshButton;
 
-    setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
-    disconnectButton = new Button("Disconnect");
-    disconnectButton.setEnabled(false);
-    add(disconnectButton);
-    disconnectButton.addActionListener(this);
-    optionsButton = new Button("Options");
-    add(optionsButton);
-    optionsButton.addActionListener(this);
-    clipboardButton = new Button("Clipboard");
-    clipboardButton.setEnabled(false);
-    add(clipboardButton);
-    clipboardButton.addActionListener(this);
-    if (viewer.rec != null) {
-      recordButton = new Button("Record");
-      add(recordButton);
-      recordButton.addActionListener(this);
-    }
-    ctrlAltDelButton = new Button("Send Ctrl-Alt-Del");
-    ctrlAltDelButton.setEnabled(false);
-    add(ctrlAltDelButton);
-    ctrlAltDelButton.addActionListener(this);
-    refreshButton = new Button("Refresh");
-    refreshButton.setEnabled(false);
-    add(refreshButton);
-    refreshButton.addActionListener(this);
-  }
+	ButtonPanel(VncViewer v)
+	{
+		viewer = v;
 
-  //
-  // Enable buttons on successful connection.
-  //
+		setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+		disconnectButton = new JButton("Disconnect");
+		disconnectButton.setEnabled(false);
+		// add(disconnectButton);
+		disconnectButton.addActionListener(this);
+		optionsButton = new JButton("Options");
+		// add(optionsButton);
+		optionsButton.addActionListener(this);
+		clipboardButton = new JButton("Clipboard");
+		clipboardButton.setEnabled(false);
+		// add(clipboardButton);
+		clipboardButton.addActionListener(this);
+		if (viewer.rec != null)
+		{
+			recordButton = new JButton("Record");
+			// add(recordButton);
+			recordButton.addActionListener(this);
+		}
+		ctrlAltDelButton = new JButton("Send Ctrl-Alt-Del");
+		ctrlAltDelButton.setEnabled(false);
+		add(ctrlAltDelButton);
+		ctrlAltDelButton.addActionListener(this);
+		refreshButton = new JButton("Refresh");
+		refreshButton.setEnabled(false);
+		add(refreshButton);
+		refreshButton.addActionListener(this);
+	}
 
-  public void enableButtons() {
-    disconnectButton.setEnabled(true);
-    clipboardButton.setEnabled(true);
-    refreshButton.setEnabled(true);
-  }
+	//
+	// Enable buttons on successful connection.
+	//
 
-  //
-  // Disable all buttons on disconnect.
-  //
+	public void enableButtons()
+	{
+		disconnectButton.setEnabled(true);
+		clipboardButton.setEnabled(true);
+		refreshButton.setEnabled(true);
+	}
 
-  public void disableButtonsOnDisconnect() {
-    remove(disconnectButton);
-    disconnectButton = new Button("Hide desktop");
-    disconnectButton.setEnabled(true);
-    add(disconnectButton, 0);
-    disconnectButton.addActionListener(this);
+	//
+	// Disable all buttons on disconnect.
+	//
 
-    optionsButton.setEnabled(false);
-    clipboardButton.setEnabled(false);
-    ctrlAltDelButton.setEnabled(false);
-    refreshButton.setEnabled(false);
+	public void disableButtonsOnDisconnect()
+	{
+		remove(disconnectButton);
+		disconnectButton = new JButton("Hide desktop");
+		disconnectButton.setEnabled(true);
+		add(disconnectButton, 0);
+		disconnectButton.addActionListener(this);
 
-    validate();
-  }
+		optionsButton.setEnabled(false);
+		clipboardButton.setEnabled(false);
+		ctrlAltDelButton.setEnabled(false);
+		refreshButton.setEnabled(false);
 
-  //
-  // Enable/disable controls that should not be available in view-only
-  // mode.
-  //
+		validate();
+	}
 
-  public void enableRemoteAccessControls(boolean enable) {
-    ctrlAltDelButton.setEnabled(enable);
-  }
+	//
+	// Enable/disable controls that should not be available in view-only
+	// mode.
+	//
 
-  //
-  // Event processing.
-  //
+	public void enableRemoteAccessControls(boolean enable)
+	{
+		ctrlAltDelButton.setEnabled(enable);
+	}
 
-  public void actionPerformed(ActionEvent evt) {
+	//
+	// Event processing.
+	//
 
-    viewer.moveFocusToDesktop();
+	@Override
+	public void actionPerformed(ActionEvent evt)
+	{
 
-    if (evt.getSource() == disconnectButton) {
-      viewer.disconnect();
+		viewer.moveFocusToDesktop();
 
-    } else if (evt.getSource() == optionsButton) {
-      viewer.options.setVisible(!viewer.options.isVisible());
+		if (evt.getSource() == disconnectButton)
+		{
+			viewer.disconnect();
 
-    } else if (evt.getSource() == recordButton) {
-      viewer.rec.setVisible(!viewer.rec.isVisible());
+		}
+		else if (evt.getSource() == optionsButton)
+		{
+			viewer.options.setVisible(!viewer.options.isVisible());
 
-    } else if (evt.getSource() == clipboardButton) {
-      viewer.clipboard.setVisible(!viewer.clipboard.isVisible());
+		}
+		else if (evt.getSource() == recordButton)
+		{
+			viewer.rec.setVisible(!viewer.rec.isVisible());
 
-    } else if (evt.getSource() == ctrlAltDelButton) {
-      try {
-        final int modifiers = InputEvent.CTRL_MASK | InputEvent.ALT_MASK;
+		}
+		else if (evt.getSource() == clipboardButton)
+		{
+			viewer.clipboard.setVisible(!viewer.clipboard.isVisible());
 
-        KeyEvent ctrlAltDelEvent =
-          new KeyEvent(this, KeyEvent.KEY_PRESSED, 0, modifiers, 127);
-        viewer.rfb.writeKeyEvent(ctrlAltDelEvent);
+		}
+		else if (evt.getSource() == ctrlAltDelButton)
+		{
+			try
+			{
+				final int modifiers = InputEvent.CTRL_MASK
+						| InputEvent.ALT_MASK;
 
-        ctrlAltDelEvent =
-          new KeyEvent(this, KeyEvent.KEY_RELEASED, 0, modifiers, 127);
-        viewer.rfb.writeKeyEvent(ctrlAltDelEvent);
+				KeyEvent ctrlAltDelEvent = new KeyEvent(this,
+						KeyEvent.KEY_PRESSED, 0, modifiers, 127);
+				viewer.rfb.writeKeyEvent(ctrlAltDelEvent);
 
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-    } else if (evt.getSource() == refreshButton) {
-      try {
-	RfbProto rfb = viewer.rfb;
-	rfb.writeFramebufferUpdateRequest(0, 0, rfb.framebufferWidth,
-					  rfb.framebufferHeight, false);
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-    }
-  }
+				ctrlAltDelEvent = new KeyEvent(this, KeyEvent.KEY_RELEASED, 0,
+						modifiers, 127);
+				viewer.rfb.writeKeyEvent(ctrlAltDelEvent);
+
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		else if (evt.getSource() == refreshButton)
+		{
+			try
+			{
+				RfbProto rfb = viewer.rfb;
+				rfb.writeFramebufferUpdateRequest(0, 0, rfb.framebufferWidth,
+						rfb.framebufferHeight, false);
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
+	}
 }
-

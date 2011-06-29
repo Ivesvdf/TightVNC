@@ -1,3 +1,5 @@
+package TightVNC;
+
 //
 //  Copyright (C) 2002 Cendio Systems.  All Rights Reserved.
 //  Copyright (C) 2002 Constantin Kaplinsky.  All Rights Reserved.
@@ -23,43 +25,50 @@
 // after fatal errors or disconnect
 //
 
+import java.awt.FlowLayout;
+import java.awt.Panel;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.applet.*;
+import javax.swing.JButton;
 
 //
 // The panel which implements the Relogin button
 //
 
-class ReloginPanel extends Panel implements ActionListener {
-  Button reloginButton;
-  Button closeButton;
-  VncViewer viewer;
+class ReloginPanel extends Panel implements ActionListener
+{
+	JButton reloginButton;
+	JButton closeButton;
+	VncViewer viewer;
 
-  //
-  // Constructor.
-  //
-  public ReloginPanel(VncViewer v) {
-    viewer = v;
-    setLayout(new FlowLayout(FlowLayout.CENTER));
-    reloginButton = new Button("Login again");
-    add(reloginButton);
-    reloginButton.addActionListener(this);
-    if (viewer.inSeparateFrame) {
-      closeButton = new Button("Close window");
-      add(closeButton);
-      closeButton.addActionListener(this);
-    }
-  }
+	//
+	// Constructor.
+	//
+	public ReloginPanel(VncViewer v)
+	{
+		viewer = v;
+		setLayout(new FlowLayout(FlowLayout.CENTER));
+		reloginButton = new JButton("Login again");
+		add(reloginButton);
+		reloginButton.addActionListener(this);
+		if (viewer.inSeparateFrame)
+		{
+			closeButton = new JButton("Close window");
+			add(closeButton);
+			closeButton.addActionListener(this);
+		}
+	}
 
-  //
-  // This method is called when a button is pressed.
-  //
-  public synchronized void actionPerformed(ActionEvent evt) {
-    if (viewer.inSeparateFrame)
-      viewer.vncFrame.dispose();
-    if (evt.getSource() == reloginButton)
-      viewer.getAppletContext().showDocument(viewer.getDocumentBase());
-  }
+	//
+	// This method is called when a button is pressed.
+	//
+	@Override
+	public synchronized void actionPerformed(ActionEvent evt)
+	{
+		if (viewer.inSeparateFrame)
+			viewer.vncFrame.dispose();
+		if (evt.getSource() == reloginButton)
+			viewer.getAppletContext().showDocument(viewer.getDocumentBase());
+	}
 }

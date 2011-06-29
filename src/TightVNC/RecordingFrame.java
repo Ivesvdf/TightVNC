@@ -1,3 +1,5 @@
+package TightVNC;
+
 //
 //  Copyright (C) 2002 Constantin Kaplinsky.  All Rights Reserved.
 //
@@ -22,290 +24,363 @@
 // FBS (FrameBuffer Stream) files.
 //
 
-import java.io.*;
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Color;
+import java.awt.FileDialog;
+import java.awt.Font;
+import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.Label;
+import java.awt.Panel;
+import java.awt.TextField;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import java.io.File;
 
-class RecordingFrame extends Frame
-  implements WindowListener, ActionListener {
+import javax.swing.JButton;
 
-  boolean recording;
+class RecordingFrame extends Frame implements WindowListener, ActionListener
+{
 
-  TextField fnameField;
-  Button browseButton;
+	boolean recording;
 
-  Label statusLabel;
+	TextField fnameField;
+	JButton browseButton;
 
-  Button recordButton, nextButton, closeButton;
-  VncViewer viewer;
+	Label statusLabel;
 
-  //
-  // Check if current security manager allows to create a
-  // RecordingFrame object.
-  //
+	JButton recordButton, nextButton, closeButton;
+	VncViewer viewer;
 
-  public static boolean checkSecurity() {
-    SecurityManager security = System.getSecurityManager();
-    if (security != null) {
-      try {
-	security.checkPropertyAccess("user.dir");
-	security.checkPropertyAccess("file.separator");
-	// Work around (rare) checkPropertyAccess bug
-	System.getProperty("user.dir");
-      } catch (SecurityException e) {
-	System.out.println("SecurityManager restricts session recording.");
-	return false;
-      }
-    }
-    return true;
-  }
+	//
+	// Check if current security manager allows to create a
+	// RecordingFrame object.
+	//
 
-  //
-  // Constructor.
-  //
+	public static boolean checkSecurity()
+	{
+		SecurityManager security = System.getSecurityManager();
+		if (security != null)
+		{
+			try
+			{
+				security.checkPropertyAccess("user.dir");
+				security.checkPropertyAccess("file.separator");
+				// Work around (rare) checkPropertyAccess bug
+			}
+			catch (SecurityException e)
+			{
+				return false;
+			}
+		}
+		return true;
+	}
 
-  RecordingFrame(VncViewer v) {
-    super("TightVNC Session Recording");
+	//
+	// Constructor.
+	//
 
-    viewer = v;
+	RecordingFrame(VncViewer v)
+	{
+		super("TightVNC Session Recording");
 
-    // Determine initial filename for next saved session.
-    // FIXME: Check SecurityManager.
+		viewer = v;
 
-    String fname = nextNewFilename(System.getProperty("user.dir") +
-				   System.getProperty("file.separator") +
-				   "vncsession.fbs");
+		// Determine initial filename for next saved session.
+		// FIXME: Check SecurityManager.
 
-    // Construct new panel with file name field and "Browse" button.
+		String fname = nextNewFilename(System.getProperty("user.dir")
+				+ System.getProperty("file.separator") + "vncsession.fbs");
 
-    Panel fnamePanel = new Panel();
-    GridBagLayout fnameGridbag = new GridBagLayout();
-    fnamePanel.setLayout(fnameGridbag);
+		// Construct new panel with file name field and "Browse" button.
 
-    GridBagConstraints fnameConstraints = new GridBagConstraints();
-    fnameConstraints.gridwidth = GridBagConstraints.RELATIVE;
-    fnameConstraints.fill = GridBagConstraints.BOTH;
-    fnameConstraints.weightx = 4.0;
+		Panel fnamePanel = new Panel();
+		GridBagLayout fnameGridbag = new GridBagLayout();
+		fnamePanel.setLayout(fnameGridbag);
 
-    fnameField = new TextField(fname, 64);
-    fnameGridbag.setConstraints(fnameField, fnameConstraints);
-    fnamePanel.add(fnameField);
-    fnameField.addActionListener(this);
+		GridBagConstraints fnameConstraints = new GridBagConstraints();
+		fnameConstraints.gridwidth = GridBagConstraints.RELATIVE;
+		fnameConstraints.fill = GridBagConstraints.BOTH;
+		fnameConstraints.weightx = 4.0;
 
-    fnameConstraints.gridwidth = GridBagConstraints.REMAINDER;
-    fnameConstraints.weightx = 1.0;
+		fnameField = new TextField(fname, 64);
+		fnameGridbag.setConstraints(fnameField, fnameConstraints);
+		fnamePanel.add(fnameField);
+		fnameField.addActionListener(this);
 
-    browseButton = new Button("Browse");
-    fnameGridbag.setConstraints(browseButton, fnameConstraints);
-    fnamePanel.add(browseButton);
-    browseButton.addActionListener(this);
+		fnameConstraints.gridwidth = GridBagConstraints.REMAINDER;
+		fnameConstraints.weightx = 1.0;
 
-    // Construct the frame.
+		browseButton = new JButton("Browse");
+		fnameGridbag.setConstraints(browseButton, fnameConstraints);
+		fnamePanel.add(browseButton);
+		browseButton.addActionListener(this);
 
-    GridBagLayout gridbag = new GridBagLayout();
-    setLayout(gridbag);
+		// Construct the frame.
 
-    GridBagConstraints gbc = new GridBagConstraints();
-    gbc.gridwidth = GridBagConstraints.REMAINDER;
-    gbc.fill = GridBagConstraints.BOTH;
-    gbc.weighty = 1.0;
-    gbc.insets = new Insets(10, 0, 0, 0);
+		GridBagLayout gridbag = new GridBagLayout();
+		setLayout(gridbag);
 
-    Label helpLabel =
-      new Label("File name to save next recorded session in:", Label.CENTER);
-    gridbag.setConstraints(helpLabel, gbc);
-    add(helpLabel);
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.gridwidth = GridBagConstraints.REMAINDER;
+		gbc.fill = GridBagConstraints.BOTH;
+		gbc.weighty = 1.0;
+		gbc.insets = new Insets(10, 0, 0, 0);
 
-    gbc.fill = GridBagConstraints.HORIZONTAL;
-    gbc.weighty = 0.0;
-    gbc.insets = new Insets(0, 0, 0, 0);
+		Label helpLabel = new Label(
+				"File name to save next recorded session in:", Label.CENTER);
+		gridbag.setConstraints(helpLabel, gbc);
+		add(helpLabel);
 
-    gridbag.setConstraints(fnamePanel, gbc);
-    add(fnamePanel);
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		gbc.weighty = 0.0;
+		gbc.insets = new Insets(0, 0, 0, 0);
 
-    gbc.fill = GridBagConstraints.BOTH;
-    gbc.weighty = 1.0;
-    gbc.insets = new Insets(10, 0, 10, 0);
+		gridbag.setConstraints(fnamePanel, gbc);
+		add(fnamePanel);
 
-    statusLabel = new Label("", Label.CENTER);
-    gridbag.setConstraints(statusLabel, gbc);
-    add(statusLabel);
+		gbc.fill = GridBagConstraints.BOTH;
+		gbc.weighty = 1.0;
+		gbc.insets = new Insets(10, 0, 10, 0);
 
-    gbc.fill = GridBagConstraints.HORIZONTAL;
-    gbc.weightx = 1.0;
-    gbc.weighty = 0.0;
-    gbc.gridwidth = 1;
-    gbc.insets = new Insets(0, 0, 0, 0);
+		statusLabel = new Label("", Label.CENTER);
+		gridbag.setConstraints(statusLabel, gbc);
+		add(statusLabel);
 
-    recordButton = new Button("Record");
-    gridbag.setConstraints(recordButton, gbc);
-    add(recordButton);
-    recordButton.addActionListener(this);
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		gbc.weightx = 1.0;
+		gbc.weighty = 0.0;
+		gbc.gridwidth = 1;
+		gbc.insets = new Insets(0, 0, 0, 0);
 
-    nextButton = new Button("Next file");
-    gridbag.setConstraints(nextButton, gbc);
-    add(nextButton);
-    nextButton.addActionListener(this);
+		recordButton = new JButton("Record");
+		gridbag.setConstraints(recordButton, gbc);
+		add(recordButton);
+		recordButton.addActionListener(this);
 
-    closeButton = new Button("Close");
-    gridbag.setConstraints(closeButton, gbc);
-    add(closeButton);
-    closeButton.addActionListener(this);
+		nextButton = new JButton("Next file");
+		gridbag.setConstraints(nextButton, gbc);
+		add(nextButton);
+		nextButton.addActionListener(this);
 
-    // Set correct text, font and color for the statusLabel.
-    stopRecording();
+		closeButton = new JButton("Close");
+		gridbag.setConstraints(closeButton, gbc);
+		add(closeButton);
+		closeButton.addActionListener(this);
 
-    pack();
+		// Set correct text, font and color for the statusLabel.
+		stopRecording();
 
-    addWindowListener(this);
-  }
+		pack();
 
-  //
-  // If the given string ends with ".NNN" where NNN is a decimal
-  // number, increase this number by one. Otherwise, append ".001"
-  // to the given string.
-  //
+		addWindowListener(this);
+	}
 
-  protected String nextFilename(String fname) {
-    int len = fname.length();
-    int suffixPos = len;
-    int suffixNum = 1;
+	//
+	// If the given string ends with ".NNN" where NNN is a decimal
+	// number, increase this number by one. Otherwise, append ".001"
+	// to the given string.
+	//
 
-    if (len > 4 && fname.charAt(len - 4) == '.') {
-      try {
-	suffixNum = Integer.parseInt(fname.substring(len - 3, len)) + 1;
-	suffixPos = len - 4;
-      } catch (NumberFormatException e) { }
-    }
+	protected String nextFilename(String fname)
+	{
+		int len = fname.length();
+		int suffixPos = len;
+		int suffixNum = 1;
 
-    char[] zeroes = {'0', '0', '0'};
-    String suffix = String.valueOf(suffixNum);
-    if (suffix.length() < 3) {
-      suffix = new String(zeroes, 0, 3 - suffix.length()) + suffix;
-    }
+		if (len > 4 && fname.charAt(len - 4) == '.')
+		{
+			try
+			{
+				suffixNum = Integer.parseInt(fname.substring(len - 3, len)) + 1;
+				suffixPos = len - 4;
+			}
+			catch (NumberFormatException e)
+			{
+			}
+		}
 
-    return fname.substring(0, suffixPos) + '.' + suffix;
-  }
+		char[] zeroes = { '0', '0', '0' };
+		String suffix = String.valueOf(suffixNum);
+		if (suffix.length() < 3)
+		{
+			suffix = new String(zeroes, 0, 3 - suffix.length()) + suffix;
+		}
 
-  //
-  // Find next name of a file which does not exist yet.
-  //
+		return fname.substring(0, suffixPos) + '.' + suffix;
+	}
 
-  protected String nextNewFilename(String fname) {
-    String newName = fname;
-    File f;
-    try {
-      do {
-	newName = nextFilename(newName);
-	f = new File(newName);
-      } while (f.exists());
-    } catch (SecurityException e) { }
+	//
+	// Find next name of a file which does not exist yet.
+	//
 
-    return newName;
-  }
+	protected String nextNewFilename(String fname)
+	{
+		String newName = fname;
+		File f;
+		try
+		{
+			do
+			{
+				newName = nextFilename(newName);
+				f = new File(newName);
+			}
+			while (f.exists());
+		}
+		catch (SecurityException e)
+		{
+		}
 
-  //
-  // Let the user choose a file name showing a FileDialog.
-  //
+		return newName;
+	}
 
-  protected boolean browseFile() {
-    File currentFile = new File(fnameField.getText());
+	//
+	// Let the user choose a file name showing a FileDialog.
+	//
 
-    FileDialog fd =
-      new FileDialog(this, "Save next session as...", FileDialog.SAVE);
-    fd.setDirectory(currentFile.getParent());
-    fd.setVisible(true);
-    if (fd.getFile() != null) {
-      String newDir = fd.getDirectory();
-      String sep = System.getProperty("file.separator");
-      if (newDir.length() > 0) {
-	if (!sep.equals(newDir.substring(newDir.length() - sep.length())))
-	  newDir += sep;
-      }
-      String newFname = newDir + fd.getFile();
-      if (newFname.equals(fnameField.getText())) {
-	fnameField.setText(newFname);
-	return true;
-      }
-    }
-    return false;
-  }
+	protected boolean browseFile()
+	{
+		File currentFile = new File(fnameField.getText());
 
-  //
-  // Start recording.
-  //
+		FileDialog fd = new FileDialog(this, "Save next session as...",
+				FileDialog.SAVE);
+		fd.setDirectory(currentFile.getParent());
+		fd.setVisible(true);
+		if (fd.getFile() != null)
+		{
+			String newDir = fd.getDirectory();
+			String sep = System.getProperty("file.separator");
+			if (newDir.length() > 0)
+			{
+				if (!sep.equals(newDir.substring(newDir.length() - sep.length())))
+					newDir += sep;
+			}
+			String newFname = newDir + fd.getFile();
+			if (newFname.equals(fnameField.getText()))
+			{
+				fnameField.setText(newFname);
+				return true;
+			}
+		}
+		return false;
+	}
 
-  public void startRecording() {
-    statusLabel.setText("Status: Recording...");
-    statusLabel.setFont(new Font("Helvetica", Font.BOLD, 12));
-    statusLabel.setForeground(Color.red);
-    recordButton.setLabel("Stop recording");
+	//
+	// Start recording.
+	//
 
-    recording = true;
+	public void startRecording()
+	{
+		statusLabel.setText("Status: Recording...");
+		statusLabel.setFont(new Font("Helvetica", Font.BOLD, 12));
+		statusLabel.setForeground(Color.red);
+		recordButton.setLabel("Stop recording");
 
-    viewer.setRecordingStatus(fnameField.getText());
-  }
+		recording = true;
 
-  //
-  // Stop recording.
-  //
+		viewer.setRecordingStatus(fnameField.getText());
+	}
 
-  public void stopRecording() {
-    statusLabel.setText("Status: Not recording.");
-    statusLabel.setFont(new Font("Helvetica", Font.PLAIN, 12));
-    statusLabel.setForeground(Color.black);
-    recordButton.setLabel("Record");
+	//
+	// Stop recording.
+	//
 
-    recording = false;
+	public void stopRecording()
+	{
+		statusLabel.setText("Status: Not recording.");
+		statusLabel.setFont(new Font("Helvetica", Font.PLAIN, 12));
+		statusLabel.setForeground(Color.black);
+		recordButton.setLabel("Record");
 
-    viewer.setRecordingStatus(null);
-  }
+		recording = false;
 
-  //
-  // Close our window properly.
-  //
+		viewer.setRecordingStatus(null);
+	}
 
-  public void windowClosing(WindowEvent evt) {
-    setVisible(false);
-  }
+	//
+	// Close our window properly.
+	//
 
-  //
-  // Ignore window events we're not interested in.
-  //
+	@Override
+	public void windowClosing(WindowEvent evt)
+	{
+		setVisible(false);
+	}
 
-  public void windowActivated(WindowEvent evt) {}
-  public void windowDeactivated (WindowEvent evt) {}
-  public void windowOpened(WindowEvent evt) {}
-  public void windowClosed(WindowEvent evt) {}
-  public void windowIconified(WindowEvent evt) {}
-  public void windowDeiconified(WindowEvent evt) {}
+	//
+	// Ignore window events we're not interested in.
+	//
 
+	@Override
+	public void windowActivated(WindowEvent evt)
+	{
+	}
 
-  //
-  // Respond to button presses
-  //
+	@Override
+	public void windowDeactivated(WindowEvent evt)
+	{
+	}
 
-  public void actionPerformed(ActionEvent evt) {
-    if (evt.getSource() == browseButton) {
-      if (browseFile() && recording)
-	startRecording();
+	@Override
+	public void windowOpened(WindowEvent evt)
+	{
+	}
 
-    } else if (evt.getSource() == recordButton) {
-      if (!recording) {
-	startRecording();
-      } else {
-	stopRecording();
-        fnameField.setText(nextNewFilename(fnameField.getText()));
-      }
+	@Override
+	public void windowClosed(WindowEvent evt)
+	{
+	}
 
-    } else if (evt.getSource() == nextButton) {
-      fnameField.setText(nextNewFilename(fnameField.getText()));
-      if (recording)
-	startRecording();
+	@Override
+	public void windowIconified(WindowEvent evt)
+	{
+	}
 
-    } else if (evt.getSource() == closeButton) {
-      setVisible(false);
+	@Override
+	public void windowDeiconified(WindowEvent evt)
+	{
+	}
 
-    }
-  }
+	//
+	// Respond to button presses
+	//
+
+	@Override
+	public void actionPerformed(ActionEvent evt)
+	{
+		if (evt.getSource() == browseButton)
+		{
+			if (browseFile() && recording)
+				startRecording();
+
+		}
+		else if (evt.getSource() == recordButton)
+		{
+			if (!recording)
+			{
+				startRecording();
+			}
+			else
+			{
+				stopRecording();
+				fnameField.setText(nextNewFilename(fnameField.getText()));
+			}
+
+		}
+		else if (evt.getSource() == nextButton)
+		{
+			fnameField.setText(nextNewFilename(fnameField.getText()));
+			if (recording)
+				startRecording();
+
+		}
+		else if (evt.getSource() == closeButton)
+		{
+			setVisible(false);
+
+		}
+	}
 }

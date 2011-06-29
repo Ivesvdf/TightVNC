@@ -1,3 +1,5 @@
+package TightVNC;
+
 //
 //  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
 //  Copyright (C) 2002-2006 Constantin Kaplinsky.  All Rights Reserved.
@@ -18,99 +20,116 @@
 //  USA.
 //
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.Label;
+import java.awt.Panel;
+import java.awt.TextField;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
 
 //
 // The panel which implements the user authentication scheme
 //
 
-class AuthPanel extends Panel implements ActionListener {
+class AuthPanel extends Panel implements ActionListener
+{
 
-  TextField passwordField;
-  Button okButton;
+	TextField passwordField;
+	JButton okButton;
 
-  //
-  // Constructor.
-  //
+	//
+	// Constructor.
+	//
 
-  public AuthPanel(VncViewer viewer)
-  {
-    Label titleLabel = new Label("VNC Authentication", Label.CENTER);
-    titleLabel.setFont(new Font("Helvetica", Font.BOLD, 18));
+	public AuthPanel(VncViewer viewer)
+	{
+		Label titleLabel = new Label("VNC Authentication", Label.CENTER);
+		titleLabel.setFont(new Font("Helvetica", Font.BOLD, 18));
 
-    Label promptLabel = new Label("Password:", Label.CENTER);
+		Label promptLabel = new Label("Password:", Label.CENTER);
 
-    passwordField = new TextField(10);
-    passwordField.setForeground(Color.black);
-    passwordField.setBackground(Color.white);
-    passwordField.setEchoChar('*');
+		passwordField = new TextField(10);
+		passwordField.setForeground(Color.black);
+		passwordField.setBackground(Color.white);
+		passwordField.setEchoChar('*');
 
-    okButton = new Button("OK");
+		okButton = new JButton("OK");
 
-    GridBagLayout gridbag = new GridBagLayout();
-    GridBagConstraints gbc = new GridBagConstraints();
+		GridBagLayout gridbag = new GridBagLayout();
+		GridBagConstraints gbc = new GridBagConstraints();
 
-    setLayout(gridbag);
+		setLayout(gridbag);
 
-    gbc.gridwidth = GridBagConstraints.REMAINDER;
-    gbc.insets = new Insets(0,0,20,0);
-    gridbag.setConstraints(titleLabel,gbc);
-    add(titleLabel);
+		gbc.gridwidth = GridBagConstraints.REMAINDER;
+		gbc.insets = new Insets(0, 0, 20, 0);
+		gridbag.setConstraints(titleLabel, gbc);
+		add(titleLabel);
 
-    gbc.fill = GridBagConstraints.NONE;
-    gbc.gridwidth = 1;
-    gbc.insets = new Insets(0,0,0,0);
-    gridbag.setConstraints(promptLabel,gbc);
-    add(promptLabel);
+		gbc.fill = GridBagConstraints.NONE;
+		gbc.gridwidth = 1;
+		gbc.insets = new Insets(0, 0, 0, 0);
+		gridbag.setConstraints(promptLabel, gbc);
+		add(promptLabel);
 
-    gridbag.setConstraints(passwordField,gbc);
-    add(passwordField);
-    passwordField.addActionListener(this);
+		gridbag.setConstraints(passwordField, gbc);
+		add(passwordField);
+		passwordField.addActionListener(this);
 
-    // gbc.ipady = 10;
-    gbc.gridwidth = GridBagConstraints.REMAINDER;
-    gbc.fill = GridBagConstraints.BOTH;
-    gbc.insets = new Insets(0,20,0,0);
-    gbc.ipadx = 30;
-    gridbag.setConstraints(okButton,gbc);
-    add(okButton);
-    okButton.addActionListener(this);
-  }
+		// gbc.ipady = 10;
+		gbc.gridwidth = GridBagConstraints.REMAINDER;
+		gbc.fill = GridBagConstraints.BOTH;
+		gbc.insets = new Insets(0, 20, 0, 0);
+		gbc.ipadx = 30;
+		gridbag.setConstraints(okButton, gbc);
+		add(okButton);
+		okButton.addActionListener(this);
+	}
 
-  //
-  // Move keyboard focus to the default object, that is, the password
-  // text field.
-  //
+	//
+	// Move keyboard focus to the default object, that is, the password
+	// text field.
+	//
 
-  public void moveFocusToDefaultField()
-  {
-    passwordField.requestFocus();
-  }
+	public void moveFocusToDefaultField()
+	{
+		passwordField.requestFocus();
+	}
 
-  //
-  // This method is called when a button is pressed or return is
-  // pressed in the password text field.
-  //
+	//
+	// This method is called when a button is pressed or return is
+	// pressed in the password text field.
+	//
 
-  public synchronized void actionPerformed(ActionEvent evt)
-  {
-    if (evt.getSource() == passwordField || evt.getSource() == okButton) {
-      passwordField.setEnabled(false);
-      notify();
-    }
-  }
+	@Override
+	public synchronized void actionPerformed(ActionEvent evt)
+	{
+		if (evt.getSource() == passwordField || evt.getSource() == okButton)
+		{
+			passwordField.setEnabled(false);
+			notify();
+		}
+	}
 
-  //
-  // Wait for user entering a password, and return it as String.
-  //
+	//
+	// Wait for user entering a password, and return it as String.
+	//
 
-  public synchronized String getPassword() throws Exception
-  {
-    try {
-      wait();
-    } catch (InterruptedException e) { }
-    return passwordField.getText();
-  }
+	public synchronized String getPassword() throws Exception
+	{
+		try
+		{
+			wait();
+		}
+		catch (InterruptedException e)
+		{
+		}
+		return passwordField.getText();
+	}
 
 }

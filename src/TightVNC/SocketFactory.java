@@ -1,3 +1,4 @@
+package TightVNC;
 //
 //  Copyright (C) 2002 HorizonLive.com, Inc.  All Rights Reserved.
 //
