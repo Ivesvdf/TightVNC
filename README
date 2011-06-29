@@ -3,6 +3,16 @@
 
 ======================================================================
 
+RELEASE NOTES 
+
+I'm only releasing this because it is required by the GPL (this version is
+used in Scarlet Nebula). Please use the TightVNC 2.0 java version once
+released and don't look at this crap-pile (sorry TightVNC guys, but it really
+is a crap-pile. System.exit()'s scattered all over in library code? What the
+hell were you thinking?). 
+
+=======================================================================
+
 This distribution is based on the standard VNC source and includes new
 TightVNC-specific features and fixes, such as additional low-bandwidth
 optimizations, major GUI improvements, and more.
